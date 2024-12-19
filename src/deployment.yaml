@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-app-deployment
+  labels:
+    app: angular-app
+spec:
+  replicas: 2  # Number of pods to run
+  selector:
+    matchLabels:
+      app: angular-app
+  template:
+    metadata:
+      labels:
+        app: angular-app
+    spec:
+      containers:
+        - name: angular-app-container
+          image: myacrtamil.azurecr.io/photographer:ACRv1  # Replace with your ACR image URL
+          ports:
+            - containerPort: 80  # Port exposed by Nginx in the container
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-app-service
+spec:
+  selector:
+    app: angular-app
+  type: LoadBalancer  # Exposes the app externally
+  ports:
+    - protocol: TCP
+      port: 80          # Port to expose on the service
+      targetPort: 80     # Port on the container
