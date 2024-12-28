@@ -1,0 +1,55 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}    # AKS Cluster Name
+      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }} # Azure Resource Group Name
+      ACR_NAME: ${{ secrets.ACR_NAME }}                # Azure Container Registry Name
+      IMAGE_NAME: my-app                               # Docker image name (update as needed)
+
+    steps:
+    # Checkout the repository code
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Log in to Azure using the Service Principal credentials
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Build the Docker image
+    - name: Build Docker Image
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG .
+
+    # Log in to Azure Container Registry
+    - name: Log in to ACR
+      run: |
+        az acr login --name $ACR_NAME
+
+    # Push the Docker image to ACR
+    - name: Push Docker Image to ACR
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+
+    # Set up kubectl to interact with AKS
+    - name: Set up AKS Credentials
+      run: |
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+
+    # Deploy to AKS using the pushed image
+    - name: Deploy to AKS
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        kubectl set image deployment/$IMAGE_NAME-deployment $IMAGE_NAME-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
