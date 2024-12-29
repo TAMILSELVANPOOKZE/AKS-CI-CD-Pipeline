@@ -23,11 +23,11 @@ jobs:
     # Log in to Azure using the Service Principal credentials
     - name: Azure Login using Azure CLI
       run: |
-        echo "${{ secrets.AZURE_CLI_CREDENTIALS }}" > AZURE-CREDENTIALS.json
+        echo "${{ secrets.AZURE_CLI_CREDENTIALS }}" > azure-credentials.json
         az login --service-principal \
-         -u $(jq -r '.appId' AZURE-CREDENTIALS.json) \
-         -p $(jq -r '.password' AZURE-CREDENTIALS.json) \
-         --tenant $(jq -r '.tenant' AZURE-CREDENTIALS.json)
+         -u $(jq -r '.appId' azure-credentials.json) \
+         -p $(jq -r '.password' azure-credentials.json) \
+         --tenant $(jq -r '.tenant' azure-credentials.json)
 
 
     # Build the Docker image
