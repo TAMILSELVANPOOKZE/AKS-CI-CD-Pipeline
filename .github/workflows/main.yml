@@ -12,20 +12,19 @@ jobs:
     env:
       CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}    # AKS Cluster Name
       RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }} # Azure Resource Group Name
-      ACR_NAME: ${{ secrets.ACR_NAME }}                # Azure Container Registry Name
-      IMAGE_NAME: my-app                               # Docker image name (update as needed)
+      ACR_NAME: ${{ secrets.ACR_NAME }}            # Azure Container Registry Name
+      IMAGE_NAME: my-app                           # Docker image name (update as needed)
 
     steps:
     # Checkout the repository code
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Log in to Azure using the Service Principal credentials
-    - name: Azure Login using Azure CLI
-      run: |
-        echo "${{ secrets.AZURE_CLI_CREDENTIALS }}" > azure-credentials.json
-        az login --service-principal -u $(jq -r '.appId' azure-credentials.json) -p $(jq -r '.password' azure-credentials.json) --tenant $(jq -r '.tenant' azure-credentials.json)
-
+    # Log in to Azure using GitHub Action
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CLI_CREDENTIALS }}
 
     # Build the Docker image
     - name: Build Docker Image
