@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: angular-app-container
-          image: myacrtamil.azurecr.io/photographer:ACRv1  # Replace with your ACR image URL
+          image: myacrtamil.azurecr.io/photographer:latest  # Replace with your ACR image URL
           ports:
             - containerPort: 80  # Port exposed by Nginx in the container
 
