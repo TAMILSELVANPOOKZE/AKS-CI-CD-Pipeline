@@ -52,4 +52,5 @@ jobs:
     - name: Deploy to AKS
       run: |
         IMAGE_TAG=${{ github.sha }}
-        kubectl set image deployment/$IMAGE_NAME-deployment $IMAGE_NAME-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+        kubectl set image deployment/angular-app-deployment angular-app-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+
