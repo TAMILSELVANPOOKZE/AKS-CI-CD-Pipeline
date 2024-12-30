@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}    # AKS Cluster Name
-      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }} # Azure Resource Group Name
-      ACR_NAME: ${{ secrets.ACR_NAME }}            # Azure Container Registry Name
-      IMAGE_NAME: my-app                           # Docker image name (update as needed)
+      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}       # AKS Cluster Name
+      RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}   # Azure Resource Group Name
+      ACR_NAME: ${{ vars.ACR_NAME }}              # Azure Container Registry Name
+      IMAGE_NAME: my-app                          # Docker image name (update as needed)
 
     steps:
     # Checkout the repository code
@@ -24,7 +24,7 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CLI_CREDENTIALS }}
+        creds: ${{ vars.AZURE_CLI_CREDENTIALS }}
 
     # Build the Docker image
     - name: Build Docker Image
