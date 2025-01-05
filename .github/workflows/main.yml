@@ -99,7 +99,8 @@ jobs:
 
       - name: Initial Deployment
         run: |
-          kubectl apply -f src/deployment.yaml   # Ensure deployment.yaml contains the correct spec for your app
+          kubectl apply -f src/deployment.yaml
+   # Ensure deployment.yaml contains the correct spec for your app
           
       # Deploy to Production AKS
       - name: Deploy to Prod AKS
