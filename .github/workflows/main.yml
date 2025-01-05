@@ -97,9 +97,10 @@ jobs:
           az aks get-credentials --resource-group $RESOURCE_GROUP_PROD --name $CLUSTER_NAME_PROD --overwrite-existing
 
 
-      - name: Initial Deployment
+      - name: Apply Kubernetes Deployment
         run: |
-          kubectl apply -f src/deployment.yaml
+         kubectl apply -f $GITHUB_WORKSPACE/src/deployment.yaml
+
    # Ensure deployment.yaml contains the correct spec for your app
           
       # Deploy to Production AKS
