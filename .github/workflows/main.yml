@@ -18,6 +18,11 @@ jobs:
       # Checkout the repository code
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Debug Directory
+        run: |
+          echo "Checking file structure"
+          ls -al
+          ls -al src/
 
       # Log in to Azure using GitHub Action
       - name: Azure Login
