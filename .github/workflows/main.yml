@@ -99,7 +99,7 @@ jobs:
 
       - name: Apply Kubernetes Deployment
         run: |
-         kubectl apply -f $GITHUB_WORKSPACE/src/deployment.yaml
+         kubectl apply -f src/deployment.yaml
 
    # Ensure deployment.yaml contains the correct spec for your app
           
