@@ -101,10 +101,6 @@ jobs:
         run: |
           az aks get-credentials --resource-group $RESOURCE_GROUP_PROD --name $CLUSTER_NAME_PROD --overwrite-existing
 
-
-      - name: Apply Kubernetes Deployment
-        working-directory: src
-        run: kubectl apply -f src/deployment.yaml
          
 
    # Ensure deployment.yaml contains the correct spec for your app
