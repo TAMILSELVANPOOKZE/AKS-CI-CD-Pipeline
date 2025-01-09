@@ -11,28 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ACR_NAME: ${{ vars.ACR_NAME }}        # Azure Container Registry Name
-      IMAGE_NAME: photographer              # Docker image name
+      ACR_NAME: ${{ vars.ACR_NAME }}              # Azure Container Registry Name
+      IMAGE_NAME: photographer                   # Docker image name
 
     steps:
       # Checkout the repository code
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      # Debug Directory Structure
       - name: Debug Directory
         run: |
-          echo "Checking file structure..."
+          echo "Checking file structure"
           ls -al
           ls -al src/
 
-      # Azure Login
+      # Log in to Azure using GitHub Action
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CLI_CREDENTIALS }}
+          creds: ${{ vars.AZURE_CLI_CREDENTIALS }}
 
-      # Build the Docker Image
+      # Build the Docker image
       - name: Build Docker Image
         run: |
           IMAGE_TAG=${{ github.sha }}
@@ -43,7 +41,7 @@ jobs:
         run: |
           az acr login --name $ACR_NAME
 
-      # Push the Docker Image to ACR
+      # Push the Docker image to ACR
       - name: Push Docker Image to ACR
         run: |
           IMAGE_TAG=${{ github.sha }}
@@ -55,64 +53,69 @@ jobs:
     needs: build-and-push
 
     env:
-      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}            # Staging AKS Cluster Name
-      RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}        # Resource Group
-      ACR_NAME: ${{ vars.ACR_NAME }}                   # Azure Container Registry Name
-      IMAGE_NAME: photographer                         # Docker image name
+      CLUSTER_NAME_STAGING: ${{ vars.CLUSTER_NAME }}  # Staging AKS Cluster Name
+      RESOURCE_GROUP_STAGING: ${{ vars.RESOURCE_GROUP }}  # Resource Group for Staging AKS
+      ACR_NAME: ${{ vars.ACR_NAME }}  # Azure Container Registry Name
+      IMAGE_NAME: photographer  # Docker image name
 
     steps:
-      # Azure Login
+      # Log in to Azure
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CLI_CREDENTIALS }}
+          creds: ${{ vars.AZURE_CLI_CREDENTIALS }}
 
-      # Configure kubectl for Staging AKS
-      - name: Configure kubectl for Staging
+      # Set up kubectl for Staging AKS
+      - name: Set up Staging AKS Credentials
         run: |
-          az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+          az aks get-credentials --resource-group $RESOURCE_GROUP_STAGING --name $CLUSTER_NAME_STAGING --overwrite-existing
 
-      # Deploy to Staging
+      # Deploy to Staging AKS
       - name: Deploy to Staging AKS
         run: |
           IMAGE_TAG=${{ github.sha }}
           kubectl set image deployment/angular-app-deployment angular-app-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
-          kubectl rollout status deployment/angular-app-deployment
 
   deploy-production:
     name: Deploy to Production AKS
     runs-on: ubuntu-latest
-    needs: deploy-staging
+    needs: deploy-staging  # Ensures production deployment happens after staging deployment
     environment:
-      name: production  # Requires manual approval for production deployment
+      name: production  # Requires manual approval for this environment
 
     env:
       CLUSTER_NAME_PROD: ${{ vars.CLUSTER_NAME_PROD }}  # Production AKS Cluster Name
-      RESOURCE_GROUP_PROD: ${{ vars.RESOURCE_GROUP }}   # Resource Group
-      ACR_NAME: ${{ vars.ACR_NAME }}                   # Azure Container Registry Name
-      IMAGE_NAME: photographer                         # Docker image name
+      RESOURCE_GROUP_PROD: ${{ vars.RESOURCE_GROUP }}  # Resource Group for Production AKS
+      ACR_NAME: ${{ vars.ACR_NAME }}  # Azure Container Registry Name
+      IMAGE_NAME: photographer  # Docker image name
 
     steps:
-      # Azure Login
+      # Log in to Azure
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CLI_CREDENTIALS }}
+          creds: ${{ vars.AZURE_CLI_CREDENTIALS }}
 
-      # Configure kubectl for Production AKS
-      - name: Configure kubectl for Production
+      # Set up kubectl for Production AKS
+      - name: Set up Prod AKS Credentials
         run: |
           az aks get-credentials --resource-group $RESOURCE_GROUP_PROD --name $CLUSTER_NAME_PROD --overwrite-existing
 
-      # Debug Existing Deployment
+      # Debug existing deployments
       - name: Debug Existing Deployment
         run: |
           kubectl get deployments -o yaml
           kubectl get pods -o wide
 
-      # Deploy to Production
-      - name: Deploy to Production AKS
+ 
+      # Deploy to Production AKS
+      - name: Deploy to Prod AKS
         run: |
           IMAGE_TAG=${{ github.sha }}
           kubectl set image deployment/angular-app-deployment angular-app-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+
+      # Verify the deployment rollout
+      - name: Verify Rollout
+        run: |
           kubectl rollout status deployment/angular-app-deployment
+          kubectl describe deployment/angular-app-deployment
