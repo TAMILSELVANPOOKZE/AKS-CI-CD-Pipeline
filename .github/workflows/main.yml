@@ -75,6 +75,7 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           kubectl set image deployment/angular-app-deployment angular-app-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
+          kubectl rollout status deployment/angular-app-deployment
 
   deploy-production:
     name: Deploy to Production AKS
@@ -113,9 +114,6 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           kubectl set image deployment/angular-app-deployment angular-app-container=$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG
-
-      # Verify the deployment rollout
-      - name: Verify Rollout
-        run: |
           kubectl rollout status deployment/angular-app-deployment
-          kubectl describe deployment/angular-app-deployment
+
+    
